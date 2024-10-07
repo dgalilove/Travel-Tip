@@ -9,7 +9,8 @@ export const mapService = {
 }
 
 // TODO: Enter your API Key
-const API_KEY = 'AIzaSyCd9JVNPl5fok4zpAB93Tj5rqvoRTpLZkI'
+// const API_KEY = 'AIzaSyCd9JVNPl5fok4zpAB93Tj5rqvoRTpLZkI' // Daniel
+const API_KEY = 'AIzaSyAM40u0xkQxlD1TDamUISN2FZjmfsU4IrM' // Zohar
 var gMap
 var gMarker
 
