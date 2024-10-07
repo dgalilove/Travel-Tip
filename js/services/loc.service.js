@@ -54,6 +54,8 @@ function query() {
                 locs.sort((p1, p2) => (p1.rate - p2.rate) * gSortBy.rate)
             } else if (gSortBy.name !== undefined) {
                 locs.sort((p1, p2) => p1.name.localeCompare(p2.name) * gSortBy.name)
+            }else if (gSortBy.createdAt !== undefined) {
+                locs.sort((p1, p2) => (p1.createdAt - p2.createdAt) * gSortBy.createdAt)
             }
 
             return locs
@@ -74,6 +76,7 @@ function save(loc) {
         return storageService.put(DB_KEY, loc)
     } else {
         loc.createdAt = loc.updatedAt = Date.now()
+        console.log(log.createdAt)
         return storageService.post(DB_KEY, loc)
     }
 }

@@ -231,7 +231,6 @@ function getLocIdFromQueryParams() {
 function onSetSortBy() {
     const prop = document.querySelector('.sort-by').value
     const isDesc = document.querySelector('.sort-desc').checked
-
     if (!prop) return
 
     const sortBy = {}
