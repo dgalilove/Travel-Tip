@@ -20,7 +20,6 @@ window.app = {
 
 function onInit() {
     loadAndRenderLocs()
-
     mapService.initMap()
         .then(() => {
             // onPanToTokyo()
@@ -60,6 +59,9 @@ function renderLocs(locs) {
     elLocList.innerHTML = strHTML || 'No locs to show'
 
     renderLocStats()
+    if (locs.length === 1) {
+        displayLoc(locs[0])
+    }
 
     if (selectedLocId) {
         const selectedLoc = locs.find(loc => loc.id === selectedLocId)
@@ -248,6 +250,7 @@ function onSetSortBy() {
 
 function onSetFilterBy({ txt, minRate }) {
     const filterBy = locService.setFilterBy({ txt, minRate: +minRate })
+    console.log('txt , minRate ', { txt, minRate })
     utilService.updateQueryParams(filterBy)
     loadAndRenderLocs()
 }
