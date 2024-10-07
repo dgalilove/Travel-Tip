@@ -18,8 +18,11 @@ window.app = {
     onSetFilterBy,
 }
 
+var gUserPos = undefined
+
 function onInit() {
     loadAndRenderLocs()
+
     mapService.initMap()
         .then(() => {
             // onPanToTokyo()
@@ -29,17 +32,24 @@ function onInit() {
             console.error('OOPs:', err)
             flashMsg('Cannot init map')
         })
+
+
 }
 
 function renderLocs(locs) {
     const selectedLocId = getLocIdFromQueryParams()
     // console.log('locs:', locs)
     var strHTML = locs.map(loc => {
+        const locPos = { lat: loc.geo.lat, lng: loc.geo.lng }
+        const distance = gUserPos ? utilService.getDistance(gUserPos, locPos) : null
+        console.log(distance)
+
         const className = (loc.id === selectedLocId) ? 'active' : ''
         return `
         <li class="loc ${className}" data-id="${loc.id}">
             <h4>  
                 <span>${loc.name}</span>
+                ${gUserPos ? `<span>Distance: ${distance} KM.</span>` : ''}
                 <span title="${loc.rate} stars">${'★'.repeat(loc.rate)}</span>
             </h4>
             <p class="muted">
@@ -51,7 +61,7 @@ function renderLocs(locs) {
             <div class="loc-btns">     
                <button title="Delete" onclick="app.onRemoveLoc('${loc.id}')">🗑️</button>
                <button title="Edit" onclick="app.onUpdateLoc('${loc.id}')">✏️</button>
-               <button title="Select" onclick="app.onSelectLoc('${loc.id}')">🗺️</button>
+               <button title="Select" onclick="app.onSelectLoc('${loc.id}' , '${distance}')">🗺️</button>
             </div>     
         </li>`}).join('')
 
@@ -136,11 +146,16 @@ function onPanToUserPos() {
             unDisplayLoc()
             loadAndRenderLocs()
             flashMsg(`You are at Latitude: ${latLng.lat} Longitude: ${latLng.lng}`)
+            gUserPos = latLng
+            console.log(gUserPos)
         })
         .catch(err => {
+            gUserPos = undefined
+            console.log(gUserPos)
             console.error('OOPs:', err)
             flashMsg('Cannot get your position')
         })
+
 }
 
 function onUpdateLoc(locId) {
@@ -163,16 +178,18 @@ function onUpdateLoc(locId) {
         })
 }
 
-function onSelectLoc(locId) {
+function onSelectLoc(locId, displayDistance) {
     return locService.getById(locId)
-        .then(displayLoc)
+        .then(loc => {
+            displayLoc(loc, displayDistance)
+        })
         .catch(err => {
             console.error('OOPs:', err)
             flashMsg('Cannot display this location')
         })
 }
 
-function displayLoc(loc) {
+function displayLoc(loc, displayDistance) {
     document.querySelector('.loc.active')?.classList?.remove('active')
     document.querySelector(`.loc[data-id="${loc.id}"]`).classList.add('active')
 
@@ -181,6 +198,8 @@ function displayLoc(loc) {
 
     const el = document.querySelector('.selected-loc')
     el.querySelector('.loc-name').innerText = loc.name
+    if (gUserPos) el.querySelector('.loc-distance').innerText = 'Distance : ' + displayDistance + ' KM.'
+
     el.querySelector('.loc-address').innerText = loc.geo.address
     el.querySelector('.loc-rate').innerHTML = '★'.repeat(loc.rate)
     el.querySelector('[name=loc-copier]').value = window.location
