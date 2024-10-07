@@ -2,15 +2,17 @@
 @import url(base/base.css);
 @import url(cmps/user-msg.css);
 @import url(cmps/locs.css);
+@import url(cmps/map.css);
 @import url(cmps/selected-loc.css);
+@import url(cmps/form-search.css);
 
 @media (min-width: 750px) {
     main {
         display: flex;
         flex-direction: row-reverse;
     }
+
     .locs-container {
         width: 30vw;
     }
 }
-
