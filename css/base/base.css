@@ -1,20 +1,27 @@
+* {
+    box-sizing: border-box;
+}
+
 body {
-    background-color: var(--bg1);
-    color: #eee;
+    background-color: var(--bg2);
+    color: #000000;
     overflow-x: hidden;
+    margin: 0;
 }
 
 header {
     background-color: var(--bg2);
-    color: aliceblue;
+    color: #000000;
     padding: 0.3em;
 }
 
 header h1 {
+    padding: 0.3em;
     margin: 0;
 }
 
-input[type=text],input[type=number] {
+input[type=text],
+input[type=number] {
     line-height: 2em;
     background-color: var(--color1);
     border: 0;
@@ -25,8 +32,8 @@ button {
     border: 0;
     border-radius: .2em;
     background-color: #222;
-    padding: 6px 10px;
-    margin: 2px;
+    padding: 0.3em 0.7em;
+    margin: 0.2em;
     cursor: pointer;
     transition: background-color .5s;
 }
@@ -45,3 +52,6 @@ button:hover {
     font-size: .8em;
 }
 
+.distance {
+    color: var(--gray1);
+}
