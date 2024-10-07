@@ -9,6 +9,7 @@ window.onload = onInit
 window.app = {
     onRemoveLoc,
     onUpdateLoc,
+    onAddLoc,
     onSelectLoc,
     onPanToUserPos,
     onSearchAddress,
@@ -111,26 +112,38 @@ function onSearchAddress(ev) {
 }
 
 function onAddLoc(geo) {
-    const locName = prompt("Loc name", geo.address || "Just a place")
-    if (!locName) return
+    const dialog = document.querySelector('.location-dialog')
 
-    const loc = {
-        name: locName,
-        rate: +prompt(`Rate (1-5)`, "3"),
-        geo,
-    }
-    locService
-        .save(loc)
-        .then((savedLoc) => {
-            flashMsg(`Added Location (id: ${savedLoc.id})`)
-            utilService.updateQueryParams({ locId: savedLoc.id })
-            loadAndRenderLocs()
-        })
-        .catch((err) => {
-            console.error("OOPs:", err)
-            flashMsg("Cannot add location")
-        })
+    document.querySelector('.loc-name-input').value = geo.address
+    document.querySelector('.loc-rate-input').value = 3;
+
+    dialog.showModal();
+
+    document.querySelector('.location-form').onsubmit = (event) => {
+        event.preventDefault()
+        const locName = document.querySelector('.loc-name-input').value
+        const rate = document.querySelector('.loc-rate-input').value
+
+        const loc = {
+            name: locName,
+            rate: +rate,
+            geo,
+        }
+
+        locService.save(loc)
+            .then(savedLoc => {
+                flashMsg(`Added Location`)
+                utilService.updateQueryParams({ locId: savedLoc.id })
+                loadAndRenderLocs()
+                closeDialog()
+            })
+            .catch(() => {
+                flashMsg('Cannot add location')
+            })
+    };
 }
+
+
 
 function loadAndRenderLocs() {
     locService
@@ -162,23 +175,44 @@ function onPanToUserPos() {
 }
 
 function onUpdateLoc(locId) {
-    locService.getById(locId).then((loc) => {
-        const rate = prompt("New rate?", loc.rate)
-        if (rate !== loc.rate) {
-            loc.rate = rate
-            locService
-                .save(loc)
-                .then((savedLoc) => {
-                    flashMsg(`Rate was set to: ${savedLoc.rate}`)
+    const dialog = document.querySelector('.location-dialog')
+
+    locService.getById(locId).then(loc => {
+        document.querySelector('.dialog-title').innerText = 'Update Location'
+        document.querySelector('.loc-name-input').value = loc.name
+        document.querySelector('.loc-rate-input').value = loc.rate
+
+        dialog.showModal();
+
+        document.querySelector('.location-form').onsubmit = (event) => {
+            event.preventDefault()
+            const locName = document.querySelector('.loc-name-input').value
+            const rate = document.querySelector('.loc-rate-input').value
+
+            if (!locName || !rate) {
+                return;
+            }
+
+            loc.name = locName
+            loc.rate = +rate
+            loc.updatedAt = Date.now()
+
+            locService.save(loc)
+                .then(() => {
+                    flashMsg(`Updated Location`)
                     loadAndRenderLocs()
+                    closeDialog()
                 })
-                .catch((err) => {
-                    console.error("OOPs:", err)
-                    flashMsg("Cannot update location")
+                .catch(() => {
+                    flashMsg('Cannot update location')
                 })
-        }
+        };
+    }).catch(() => {
+        flashMsg('Cannot update location')
     })
 }
+
+
 
 function onSelectLoc(locId, displayDistance) {
     return locService.getById(locId)
@@ -190,6 +224,11 @@ function onSelectLoc(locId, displayDistance) {
             flashMsg('Cannot display this location')
         })
 }
+function closeDialog() {
+    const dialog = document.querySelector('.location-dialog')
+    dialog.close()
+}
+
 
 function displayLoc(loc, displayDistance) {
     document.querySelector('.loc.active')?.classList?.remove('active')
@@ -219,7 +258,7 @@ function unDisplayLoc() {
 function onCopyLoc() {
     const elCopy = document.querySelector("[name=loc-copier]")
     elCopy.select()
-    elCopy.setSelectionRange(0, 99999) // For mobile devices
+    elCopy.setSelectionRange(0, 99999)
     navigator.clipboard.writeText(elCopy.value)
     flashMsg("Link copied, ready to paste")
 }
@@ -227,7 +266,6 @@ function onCopyLoc() {
 function onShareLoc() {
     const url = document.querySelector("[name=loc-copier]").value
 
-    // title and text not respected by any app (e.g. whatsapp)
     const data = {
         title: "Cool location",
         text: "Check out this location",
